@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>そばたび ― 一人だけど、旅仲間がそばにいる旅</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3D4F91">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="そばたび">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #223046;
+    --ink-soft: #4b5768;
+    --parchment: #EFE6D8;
+    --parchment-deep: #E4D8C4;
+    --card: #FBF8F1;
+    --stamp: #3D4F91;
+    --stamp-deep: #2A3870;
+    --map-green: #3F6659;
+    --gold: #C79B3B;
+    --line: rgba(34,48,70,0.14);
+    --shadow: rgba(34,48,70,0.16);
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --page-bg: #14171c;
+    }
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100%;
+    background: #EADFCB;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(199,155,59,0.10), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(63,102,89,0.08), transparent 40%);
+    font-family: 'Zen Kaku Gothic New', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px 48px;
+  }
+  @media (prefers-color-scheme: dark) {
+    body:not([data-theme="light"]) { background:#181c22; background-image:none; color:#EFE6D8; }
+  }
+
+  .intro {
+    max-width: 420px;
+    text-align: center;
+    margin-bottom: 22px;
+  }
+  .intro .brand {
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+  }
+  @media (prefers-color-scheme: dark) {
+    .intro .brand:not([data-theme="light"] *) { color:#EFE6D8; }
+  }
+  .intro .tagline {
+    margin-top: 6px;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+  }
+
+  /* Phone frame */
+  .phone {
+    width: 380px;
+    max-width: 92vw;
+    height: 780px;
+    max-height: 84vh;
+    background: var(--parchment);
+    border-radius: 46px;
+    border: 10px solid #1b2330;
+    box-shadow: 0 30px 60px -20px var(--shadow), 0 0 0 2px rgba(0,0,0,0.05);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .notch {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 22px;
+    background: #1b2330;
+    border-radius: 14px;
+    z-index: 20;
+  }
+
+  /* 実機の小さい画面で開いたとき: 飾りを削って中身を画面いっぱいに広げる */
+  @media (max-width: 460px) {
+    body { padding: 14px 10px 28px; }
+    .intro { max-width: 100%; margin-bottom: 14px; }
+    .intro .brand { font-size: 21px; }
+    .intro .tagline { font-size: 11.5px; }
+    .phone {
+      width: 100%;
+      max-width: 440px;
+      height: 88vh;
+      max-height: 720px;
+      border-width: 7px;
+      border-radius: 32px;
+    }
+    .notch { width: 92px; height: 16px; top: 8px; }
+  }
+
+  .statusbar {
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 22px 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .appbar {
+    padding: 2px 20px 14px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, var(--parchment), var(--parchment) 80%, transparent);
+  }
+  .appbar .row-top {
+    display: flex;
+    align-items: center;
+  }
+  .appbar .date-chip { margin-left: auto; }
+  .appbar .brand-mark {
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 0.04em;
+  }
+  .appbar .date-chip {
+    font-size: 11.5px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 3px 10px;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  .appbar .subrow {
+    margin-top: 6px;
+    font-size: 11.5px;
+    color: var(--map-green);
+    font-weight: 500;
+  }
+  .subrow-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+  .subrow-row .subrow { margin-top: 0; }
+  .theme-chip {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--stamp-deep);
+    background: rgba(168,70,43,0.09);
+    border-radius: 10px;
+    padding: 2px 8px;
+    flex-shrink: 0;
+  }
+
+  .screen {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 16px 18px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .screen::-webkit-scrollbar { width: 0; }
+
+  .tabbar {
+    flex-shrink: 0;
+    display: flex;
+    border-top: 1px solid var(--line);
+    background: var(--card);
+    padding: 8px 6px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  .phone:not(.entered) .tabbar { display: none; }
+  .tabbar button {
+    flex: 1;
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-family: inherit;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    padding: 4px 2px;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: color .15s ease;
+  }
+  .tabbar button .icon { font-size: 18px; line-height: 1; }
+  .tabbar button.active { color: var(--stamp); font-weight: 700; }
+
+  .view { display: none; animation: fadein .25s ease; }
+  .view.active { display: block; }
+  @keyframes fadein { from { opacity:0; transform: translateY(4px);} to {opacity:1; transform:none;} }
+
+  /* ---- Join screen ---- */
+  .h1 {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.5;
+    margin: 4px 0 10px;
+  }
+  .lead { font-size: 12.5px; color: var(--ink-soft); line-height: 1.75; margin-bottom: 16px; }
+  .concept-lead {
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 600;
+    line-height: 1.85;
+    margin-bottom: 16px;
+  }
+
+  .datebox {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .datebox .d { font-family:'Shippori Mincho',serif; font-size: 17px; font-weight:700; }
+  .datebox .d span { color: var(--stamp); }
+  .datebox .n { font-size: 11px; color: var(--map-green); margin-top: 2px; font-weight: 600; }
+
+  .span-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 4px;
+  }
+  .span-head { font-size: 11.5px; font-weight: 700; color: var(--ink); margin-bottom: 10px; }
+  .span-bar {
+    height: 6px;
+    border-radius: 4px;
+    background: var(--parchment-deep);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .span-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 100%;
+    background: linear-gradient(90deg, var(--map-green), var(--gold));
+    border-radius: 4px;
+  }
+  .span-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .span-note { font-size: 10.5px; color: var(--ink-soft); line-height: 1.7; }
+  .span-note a { color: var(--stamp); font-weight: 700; text-decoration: none; }
+
+  .back-link {
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    font-weight: 600;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .back-link:hover { color: var(--stamp); }
+
+  .date-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
+  .date-card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: transform .1s ease;
+  }
+  .date-card:active { transform: scale(0.98); }
+  .date-card.featured { border-color: rgba(199,155,59,0.5); background: rgba(199,155,59,0.06); }
+  .date-card.empty { opacity: 0.85; border-style: dashed; }
+  .dc-badge {
+    position: absolute;
+    top: -8px; left: 14px;
+    background: var(--gold);
+    color: #fff;
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 10px;
+  }
+  .dc-badge.alt { background: var(--stamp); }
+  .dc-date {
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 700;
+    font-size: 19px;
+  }
+  .dc-date span { font-size: 13px; font-weight: 500; color: var(--ink-soft); }
+  .dc-date .dc-yb { margin-left: 3px; }
+  .dc-span { font-size: 11px; color: var(--map-green); font-weight: 600; margin-top: 3px; }
+  .dc-theme {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--stamp-deep);
+    background: rgba(168,70,43,0.09);
+    border-radius: 10px;
+    padding: 2px 8px;
+    margin-top: 4px;
+  }
+  .dc-people {
+    font-size: 12px;
+    font-weight: 700;
+    background: var(--parchment);
+    border-radius: 20px;
+    padding: 5px 11px;
+  }
+
+  .info-btn {
+    background: var(--card);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: 6px;
+  }
+  .info-btn:hover { color: var(--stamp); border-color: var(--stamp); }
+
+  .home-brand { text-align: center; padding: 6px 0 2px; }
+  .home-brand-mark {
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+  }
+  .home-brand-sub {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  .faq-list { display: flex; flex-direction: column; gap: 8px; }
+  .faq {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 2px 14px;
+  }
+  .faq summary {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 12px 22px 12px 0;
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+    line-height: 1.6;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::marker { content: ''; }
+  .faq summary::after {
+    content: '+';
+    position: absolute;
+    right: 0; top: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--stamp);
+  }
+  .faq[open] summary::after { content: '−'; }
+  .faq-a {
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    line-height: 1.75;
+    padding: 0 0 14px;
+  }
+
+  .ask-more {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(63,102,89,0.07);
+    border: 1px dashed var(--map-green);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-top: 12px;
+  }
+  .am-ic { font-size: 18px; flex-shrink: 0; }
+  .am-t { font-size: 12px; font-weight: 700; }
+  .am-s { font-size: 10.5px; color: var(--ink-soft); margin-top: 2px; }
+  .am-btn {
+    margin-left: auto;
+    flex-shrink: 0;
+    background: var(--card);
+    border: 1px solid var(--map-green);
+    color: var(--map-green);
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 7px 13px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+
+  .rules {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+  }
+  .rules .rt { font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+  .rules ul { margin: 0; padding: 0; list-style: none; }
+  .rules li {
+    font-size: 12px;
+    color: var(--ink-soft);
+    padding: 6px 0;
+    border-top: 1px dashed var(--line);
+    display: flex;
+    gap: 8px;
+  }
+  .rules li:first-child { border-top: none; }
+  .rules li .m { flex-shrink: 0; }
+
+  /* ---- Identity picker ---- */
+  .identity { margin-bottom: 18px; }
+  .id-note {
+    font-size: 11px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  .id-preview {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .id-preview-name { font-size: 13.5px; font-weight: 700; }
+  .id-preview-sub { font-size: 10px; color: var(--ink-soft); margin-top: 1px; }
+  .reroll {
+    margin-left: auto;
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 6px 10px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--stamp);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .id-panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 12px 14px 14px;
+  }
+  .id-panel-label { font-size: 10.5px; color: var(--ink-soft); font-weight: 700; margin-bottom: 8px; }
+  .swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+  .swatch {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    position: relative;
+  }
+  .swatch.selected { border-color: var(--ink); box-shadow: 0 0 0 2px var(--parchment) inset; }
+  .swatch.taken {
+    filter: grayscale(1);
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .swatch.taken::after {
+    content: '✕';
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #fff;
+  }
+  .letters { display: flex; gap: 6px; flex-wrap: wrap; }
+  .letter {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--parchment);
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 700;
+    font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .letter.selected { background: var(--stamp); color: #fff; border-color: var(--stamp); }
+  .letter.taken {
+    background: transparent;
+    color: var(--ink-soft);
+    opacity: 0.35;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+
+  .cta {
+    width: 100%;
+    background: var(--stamp);
+    color: #FBF3E7;
+    border: none;
+    padding: 14px;
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    box-shadow: 0 8px 18px -8px rgba(168,70,43,0.55);
+  }
+  .cta:active { transform: translateY(1px); }
+  .cta.secondary {
+    background: var(--card);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    box-shadow: none;
+    margin-top: 8px;
+  }
+
+  /* ---- Timeline ---- */
+  .post { margin-bottom: 20px; }
+  .post .who {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family:'Shippori Mincho',serif; font-weight: 700; font-size: 12px;
+    color: #fff; flex-shrink: 0;
+  }
+  .who .name { font-size: 12px; font-weight: 700; }
+  .who .time { font-size: 10.5px; color: var(--ink-soft); margin-left: auto; }
+
+  .postcard {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+    box-shadow: 0 10px 20px -12px var(--shadow);
+    border: 1px solid rgba(255,255,255,0.5);
+  }
+  .postcard .tag {
+    position: absolute;
+    left: 10px; bottom: 10px;
+    background: rgba(20,20,20,0.55);
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 9px;
+    border-radius: 20px;
+    backdrop-filter: blur(2px);
+  }
+  .postcard .stampmark {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 34px; height: 34px;
+    border: 2px dashed rgba(255,255,255,0.85);
+    border-radius: 50%;
+    display: flex; align-items:center; justify-content:center;
+    font-size: 15px;
+  }
+
+  .comment {
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--ink);
+    margin: 9px 2px 8px;
+  }
+  .reactions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .reactions .chip {
+    font-size: 12px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 3px 9px;
+    display: flex; gap: 4px; align-items: center;
+    color: var(--ink-soft);
+  }
+  .reactions .chip b { font-weight: 700; color: var(--ink); font-size: 11px; }
+  .reactions .chip.add {
+    color: var(--stamp);
+    border-color: rgba(168,70,43,0.35);
+    font-weight: 700;
+  }
+
+  .more-btn {
+    background: none; border: none;
+    font-size: 18px; line-height: 1; color: var(--ink-soft);
+    cursor: pointer; padding: 0 2px; margin-left: 4px;
+  }
+  .sheet-overlay {
+    display: none;
+    position: absolute; inset: 0;
+    background: rgba(20,24,32,0.45);
+    z-index: 30;
+    align-items: flex-end;
+  }
+  .sheet-overlay.open { display: flex; }
+  .sheet {
+    width: 100%;
+    background: var(--card);
+    border-radius: 22px 22px 0 0;
+    padding: 18px 18px 26px;
+    animation: fadein .2s ease;
+  }
+  .sheet-title { font-family:'Shippori Mincho',serif; font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .sheet-sub { font-size: 11.5px; color: var(--ink-soft); line-height: 1.65; margin-bottom: 12px; }
+  .reason {
+    font-size: 13px;
+    padding: 12px 4px;
+    border-top: 1px solid var(--line);
+    cursor: pointer;
+  }
+  .reason:hover { color: var(--stamp); }
+  .urgent-note {
+    font-size: 11px; line-height: 1.6;
+    color: var(--stamp-deep);
+    background: rgba(168,70,43,0.08);
+    border-radius: 10px;
+    padding: 9px 11px;
+    margin: 10px 0 4px;
+  }
+
+  .tl-note {
+    font-size: 11px;
+    color: var(--ink-soft);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 9px 12px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .own-post {
+    background: rgba(199,155,59,0.06);
+    border: 1px solid rgba(199,155,59,0.35);
+    border-radius: 16px;
+    padding: 10px;
+    margin-left: -10px;
+    margin-right: -10px;
+  }
+  .you-badge {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--stamp);
+    background: rgba(168,70,43,0.1);
+    border-radius: 10px;
+    padding: 2px 7px;
+  }
+
+  .private-panel {
+    background: var(--card);
+    border: 1px dashed var(--gold);
+    border-radius: 12px;
+    padding: 9px 11px;
+    margin: 4px 2px 8px;
+  }
+  .private-panel-head {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  .private-panel-body { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pchip {
+    font-size: 12px;
+    background: var(--parchment);
+    border-radius: 20px;
+    padding: 3px 9px;
+    display: flex; gap: 4px; align-items: center;
+  }
+  .pchip b { font-size: 11px; font-weight: 700; color: var(--ink); }
+
+  .reaction-add-wrap { position: relative; }
+  .chip.add.selected {
+    background: var(--stamp);
+    border-color: var(--stamp);
+    color: #fff;
+    font-weight: 700;
+  }
+  .reaction-picker {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 6px;
+    gap: 1px;
+    min-width: 168px;
+    box-shadow: 0 10px 24px -10px var(--shadow);
+    z-index: 5;
+  }
+  .reaction-picker.open { display: flex; }
+  .reaction-picker .pk {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 10px;
+    border-radius: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .reaction-picker .pk span {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .reaction-picker .pk:hover { background: var(--parchment); }
+
+  .comment-thread { margin-top: 6px; }
+  .reply-toggle {
+    font-size: 11px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .reply-toggle.open { color: var(--stamp); }
+  .replies {
+    display: none;
+    margin-top: 8px;
+    padding-left: 8px;
+    border-left: 2px solid var(--line);
+  }
+  .replies.open { display: block; }
+  .reply { display: flex; gap: 7px; align-items: flex-start; margin-bottom: 8px; }
+  .reply-body { font-size: 11.5px; color: var(--ink); line-height: 1.6; }
+  .reply-body b { font-weight: 700; margin-right: 5px; }
+  .reply-input-row { margin-top: 2px; }
+  .reply-input {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--parchment);
+    border-radius: 20px;
+    padding: 7px 12px;
+    font-family: inherit;
+    font-size: 11.5px;
+    color: var(--ink);
+  }
+  .reply-input:focus { outline: none; border-color: var(--stamp); }
+
+  .day-divider {
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin: 4px 0 16px;
+    position: relative;
+  }
+  .day-divider span {
+    background: var(--parchment);
+    padding: 0 10px;
+    position: relative;
+    z-index: 1;
+  }
+  .day-divider::before {
+    content: '';
+    position: absolute; left:0; right:0; top:50%;
+    border-top: 1px dashed var(--line);
+  }
+
+  /* ---- Post screen ---- */
+  .upload {
+    aspect-ratio: 4/3;
+    border: 2px dashed var(--gold);
+    border-radius: 16px;
+    background: rgba(199,155,59,0.06);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    color: var(--ink-soft);
+  }
+  .upload .ic { font-size: 26px; }
+  .upload .t1 { font-size: 12.5px; font-weight: 700; color: var(--ink); }
+  .upload .t2 { font-size: 10.5px; }
+
+  .link-row {
+    text-align: center;
+    font-size: 11.5px;
+    margin-top: 10px;
+    color: var(--ink-soft);
+  }
+  .link-row a { color: var(--stamp); font-weight: 700; text-decoration: none; }
+
+  .notice-strict {
+    display: flex;
+    gap: 9px;
+    background: rgba(168,70,43,0.08);
+    border: 1px solid rgba(168,70,43,0.3);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+  }
+  .notice-ic { font-size: 16px; flex-shrink: 0; }
+  .notice-t { font-size: 11.5px; line-height: 1.65; color: var(--stamp-deep); }
+
+  .duration-row { display: flex; gap: 7px; flex-wrap: wrap; }
+  .duration-chip {
+    font-size: 12px;
+    padding: 7px 12px;
+    border-radius: 20px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .duration-chip.selected {
+    background: var(--map-green);
+    border-color: var(--map-green);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .preview-card { margin-top: 18px; }
+  .preview-card-label { font-size: 10.5px; font-weight: 700; color: var(--ink-soft); margin-bottom: 8px; }
+  .preview-postcard {
+    background: linear-gradient(160deg, #EFE6D8, #E4D8C4);
+    border: 1px dashed var(--gold);
+    border-radius: 14px;
+    padding: 18px 16px;
+    text-align: center;
+  }
+  .preview-pc-date { font-family: 'Shippori Mincho', serif; font-size: 15px; font-weight: 700; }
+  .preview-pc-theme { font-size: 12px; margin-top: 6px; color: var(--map-green); font-weight: 600; }
+  .preview-pc-copy { font-size: 11.5px; margin-top: 10px; color: var(--ink-soft); line-height: 1.6; }
+
+  .field-label { font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+  textarea.msg {
+    width: 100%;
+    height: 80px;
+    resize: none;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 12.5px;
+    color: var(--ink);
+    background: var(--card);
+    line-height: 1.6;
+  }
+  .counter {
+    text-align: right;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    margin: 4px 2px 14px;
+  }
+
+  .privacy-note {
+    display: flex;
+    gap: 8px;
+    background: rgba(63,102,89,0.08);
+    border: 1px solid rgba(63,102,89,0.25);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 11px;
+    color: var(--map-green);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  /* ---- Album screen ---- */
+  .history-list { display: flex; flex-direction: column; gap: 10px; }
+  .history-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 10px;
+    cursor: pointer;
+    transition: transform .1s ease;
+  }
+  .history-card:active { transform: scale(0.98); }
+  .hc-thumbs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+    width: 96px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .hc-tile { width: 100%; height: 100%; }
+  .hc-date {
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .hc-now {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--stamp);
+    background: rgba(168,70,43,0.1);
+    border-radius: 10px;
+    padding: 1px 7px;
+    margin-left: 6px;
+  }
+  .hc-theme { font-size: 11px; color: var(--map-green); font-weight: 600; margin-top: 3px; }
+
+  .save-row { margin-bottom: 16px; }
+  .save-btn {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--gold);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 12px;
+    border-radius: 14px;
+    cursor: pointer;
+  }
+  .save-btn:hover { background: rgba(199,155,59,0.08); }
+  .save-note {
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  .still-open {
+    display: flex;
+    gap: 10px;
+    background: rgba(76,143,224,0.08);
+    border: 1px solid rgba(76,143,224,0.25);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  .still-open-ic { font-size: 20px; flex-shrink: 0; line-height: 1.4; }
+  .still-open-t { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .still-open-s { font-size: 11px; color: var(--ink-soft); line-height: 1.65; }
+
+  .album-hero {
+    text-align: center;
+    padding: 18px 8px 20px;
+  }
+  .album-hero .stamp-icon {
+    font-size: 26px;
+  }
+  .album-hero .h1 { margin: 8px 0 4px; }
+  .album-hero .sub { font-size: 11.5px; color: var(--ink-soft); }
+  .grid3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+  .grid3 .tile {
+    aspect-ratio: 1/1;
+    border-radius: 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <div class="brand">そばたび</div>
+  <div class="tagline">一人だけど、旅仲間がそばにいる旅。<br>同じ日程を旅する人たちだけの、期間限定タイムライン。</div>
+</div>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="statusbar">
+    <span>9:41</span>
+    <span>●●●●</span>
+  </div>
+
+  <div class="appbar">
+    <div class="row-top">
+      <div class="brand-mark">そばたび</div>
+      <button class="info-btn" onclick="go('view-home')" aria-label="コンセプトとルールを見る">ⓘ</button>
+      <div class="date-chip">10/4(土)発</div>
+    </div>
+    <div class="subrow-row">
+      <div class="theme-chip">🍜 ひとりグルメ</div>
+      <div class="subrow" id="groupline">参加中: 6人 ・ 日帰り〜9日間(最長:旅人K)</div>
+    </div>
+  </div>
+
+  <!-- HOME VIEW -->
+  <div class="screen view active" id="view-home">
+    <div class="home-brand">
+      <div class="home-brand-mark">🚃 そばたび ✈️</div>
+      <div class="home-brand-sub">一人だけど、旅仲間がそばにいる旅</div>
+    </div>
+
+    <div class="concept-lead" style="margin-top:14px;">同じ日に出発する人たちが集まる、ゆるやかなグループです。旅の長さはバラバラでいい。行き先もバラバラでいい。誰とも会わない、名乗らない。ただ、同じ日に旅立つ実感だけを共有します。</div>
+
+    <div class="rules" style="margin-top:18px;">
+      <div class="rt">3つのルール</div>
+      <ul>
+        <li><span class="m">🙈</span>顔写真はアップしない</li>
+        <li><span class="m">🤐</span>同じ場所にいても声はかけない</li>
+        <li><span class="m">✉️</span>DM・個別連絡の機能はありません</li>
+      </ul>
+    </div>
+
+    <div class="field-label" style="margin-top:18px;">よくある質問</div>
+    <div class="faq-list">
+      <details class="faq">
+        <summary>同じ日にちだけどテーマが違う。参加していい?それとも新しく募集を立てるべき?</summary>
+        <div class="faq-a">参加してOKです。テーマは「その日の空気感の目安」であって、縛りではありません。ただ、雰囲気がかなり違う場合(温泉の日にひとりキャンプで参加、など)は共感が薄くなることもあるので、近いテーマの日を選ぶか、自分でテーマ付きの募集を立てる方が、似た熱量の人と出会いやすいです。</div>
+      </details>
+      <details class="faq">
+        <summary>日数が違っても参加できるメリットって?</summary>
+        <div class="faq-a">「同じ日に旅立つ」というワクワク感は、旅の長さに関係なく共有できます。1泊の人も2週間の人も、出発の朝の高揚感は同じ。逆に日数を揃えようとすると、参加できる人がぐっと減ってしまいます。<br><br>また、タイムラインは参加者全員の旅が終わるまで動き続けます。自分の旅が先に終わっても、まだ旅の途中の人がいれば、その投稿を見たりコメントしたりし続けられます。</div>
+      </details>
+      <details class="faq">
+        <summary>自分の旅が終わったら、投稿はどうなるの?</summary>
+        <div class="faq-a">あなたの旅程が終わったタイミングで、あなた宛てに「まとめ」アルバムが自動で届きます(旅の期間中にあなたが投稿したものだけを集めた、あなただけの振り返りページです)。グループ自体は、他の参加者がまだ旅の途中なら開いたままなので、そちらは引き続きのぞきに行けます。</div>
+      </details>
+      <details class="faq">
+        <summary>顔が写り込んだ投稿を見つけたら?</summary>
+        <div class="faq-a">投稿の「⋯」からその場で通報できます。運営が確認するまで、その投稿はあなたのタイムラインから外れます。通報したことは相手には分かりません。</div>
+      </details>
+      <details class="faq">
+        <summary>声をかけられたり、困ったことがあったら?</summary>
+        <div class="faq-a">DM機能はなく、声かけも禁止ルールです。それでも困ったことがあれば「⋯」から通報を。身の危険を感じるような緊急性の高いケースは、アプリの対応を待たずに警察(110)など、直接の連絡先へ相談してください。</div>
+      </details>
+    </div>
+
+    <div class="ask-more">
+      <div class="am-ic">💬</div>
+      <div>
+        <div class="am-t">ここにない質問がある?</div>
+        <div class="am-s">運営に直接聞いてみてください</div>
+      </div>
+      <button class="am-btn">質問する</button>
+    </div>
+
+    <button class="cta" style="margin-top:16px;" onclick="enterApp()">参加してみる</button>
+  </div>
+
+  <!-- DATE LIST VIEW -->
+  <div class="screen view" id="view-dates">
+    <div class="h1">旅立つ日を選ぶ</div>
+    <div class="lead">気になる出発日をタップしてください。旅の長さやテーマの幅も、ここで確認できます。</div>
+
+    <div class="date-list">
+      <div class="date-card" onclick="go('view-join')">
+        <div class="dc-left">
+          <div class="dc-date">10<span>/</span>1<span class="dc-yb">(水)</span></div>
+          <div class="dc-span">日帰り〜4日間</div>
+        </div>
+        <div class="dc-right">
+          <div class="dc-people">👥 3人</div>
+        </div>
+      </div>
+
+      <div class="date-card featured" onclick="go('view-join')">
+        <div class="dc-badge">賑わってます</div>
+        <div class="dc-left">
+          <div class="dc-date">10<span>/</span>4<span class="dc-yb">(土)</span></div>
+          <div class="dc-theme">🍜 ひとりグルメ</div>
+          <div class="dc-span">日帰り〜9日間(最長:旅人K)</div>
+        </div>
+        <div class="dc-right">
+          <div class="dc-people">👥 6人</div>
+        </div>
+      </div>
+
+      <div class="date-card" onclick="go('view-join')">
+        <div class="dc-left">
+          <div class="dc-date">10<span>/</span>5<span class="dc-yb">(日)</span></div>
+          <div class="dc-theme">♨️ 温泉</div>
+          <div class="dc-span">2泊3日</div>
+        </div>
+        <div class="dc-right">
+          <div class="dc-people">👥 1人</div>
+        </div>
+      </div>
+
+      <div class="date-card" onclick="go('view-join')">
+        <div class="dc-badge alt">人気</div>
+        <div class="dc-left">
+          <div class="dc-date">10<span>/</span>11<span class="dc-yb">(土)</span></div>
+          <div class="dc-span">日帰り〜2週間・テーマなし</div>
+        </div>
+        <div class="dc-right">
+          <div class="dc-people">👥 12人</div>
+        </div>
+      </div>
+
+      <div class="date-card empty" onclick="go('view-join')">
+        <div class="dc-left">
+          <div class="dc-date">10<span>/</span>12<span class="dc-yb">(日)</span></div>
+          <div class="dc-theme">🛏️ ホカンス</div>
+          <div class="dc-span">まだ誰もいません・最初の1人になる</div>
+        </div>
+        <div class="dc-right">
+          <div class="dc-people">👥 0人</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="span-note" style="text-align:center;margin-top:14px;">希望の日がない?<a href="#" onclick="go('view-create'); return false;">「募集を立てる」</a>から、自分で新しい日程を作れます</div>
+  </div>
+
+  <!-- JOIN VIEW -->
+  <div class="screen view" id="view-join">
+    <div class="back-link" onclick="go('view-dates')">← 日程を選び直す</div>
+    <div class="h1">この日程で参加する</div>
+    <div class="lead">旅の長さや行き先は、あなた次第。参加すると、この日だけの名前「旅人◯」が決まります。</div>
+
+    <div class="datebox">
+      <div>
+        <div class="d">10/4<span>(土)</span></div>
+        <div class="n">出発日</div>
+      </div>
+      <div style="font-size:20px;">🗓️</div>
+    </div>
+
+    <div class="span-card">
+      <div class="span-head">この日に出発する、参加者の旅程の幅</div>
+      <div class="span-bar"><div class="span-fill"></div></div>
+      <div class="span-labels"><span>日帰り</span><span>9日間(最長・旅人K)</span></div>
+      <div class="span-note">グループのタイムラインは、旅程が一番長い人が終わるまで開いたままです。</div>
+    </div>
+
+    <div class="field-label" style="margin-top:16px;">あなたの旅の長さ</div>
+    <div class="duration-row" id="my-duration">
+      <div class="duration-chip">日帰り</div>
+      <div class="duration-chip selected">1〜3泊</div>
+      <div class="duration-chip">4〜6泊</div>
+      <div class="duration-chip">1週間前後</div>
+      <div class="duration-chip">2週間まで</div>
+    </div>
+    <div class="span-note" style="margin-top:8px;">それ以上の長期旅行は、参加ではなく<a href="#" onclick="go('view-create'); return false;">「募集を立てる」</a>がおすすめです。同じくらいの旅程の人が集まりやすくなります。</div>
+
+    <div class="rules" style="margin-top:16px;">
+      <div class="rt">参加のルール</div>
+      <ul>
+        <li><span class="m">🙈</span>顔写真はアップしない</li>
+        <li><span class="m">🤐</span>同じ場所にいても声はかけない</li>
+        <li><span class="m">✉️</span>DM・個別連絡の機能はありません</li>
+        <li><span class="m">⏳</span>タイムラインは同じ日程の参加者にだけ公開</li>
+      </ul>
+    </div>
+
+    <div class="identity">
+      <div class="rt" style="margin-bottom:2px;">今回の旅の名前</div>
+      <div class="id-note">参加のたびに新しく決まります。前回までと同じにはできません。</div>
+
+      <div class="id-preview">
+        <div class="avatar" id="preview-avatar" style="width:40px;height:40px;font-size:16px;">M</div>
+        <div>
+          <div class="id-preview-name">旅人<span id="preview-letter">M</span></div>
+          <div class="id-preview-sub">このグループでの、今回だけの名前</div>
+        </div>
+        <button class="reroll" onclick="reroll()">🔀 選び直す</button>
+      </div>
+
+      <div class="id-panel" id="id-panel">
+        <div class="id-panel-label">カラー(グレーは使用中)</div>
+        <div class="swatches" id="swatches"></div>
+        <div class="id-panel-label" style="margin-top:12px;">イニシャル(グレーは使用中)</div>
+        <div class="letters" id="letters"></div>
+      </div>
+    </div>
+
+    <button class="cta" onclick="go('view-timeline')">この日程で参加する</button>
+    <div class="link-row"><a href="#" onclick="go('view-create'); return false;">ちょうどいい日程がない?自分で募集を立てる →</a></div>
+  </div>
+
+  <!-- CREATE CALL VIEW -->
+  <div class="screen view" id="view-create">
+    <div class="h1">旅の募集を立てる</div>
+    <div class="lead">あなたの旅程を公開して、同じ時期に出発する仲間を集めます。</div>
+
+    <div class="notice-strict">
+      <div class="notice-ic">⚠️</div>
+      <div class="notice-t">これは「一緒に行く」募集ではありません。行き先や待ち合わせは書けません。集まるのは、同じ時期にそれぞれ旅立つ人だけです。</div>
+    </div>
+
+    <div class="field-label">出発日</div>
+    <div class="datebox" style="margin-bottom:14px;">
+      <div>
+        <div class="d">10/4<span>(土)</span></div>
+        <div class="n">出発日</div>
+      </div>
+      <div style="font-size:20px;">🗓️</div>
+    </div>
+
+    <div class="field-label">旅の長さ</div>
+    <div class="duration-row">
+      <div class="duration-chip">日帰り</div>
+      <div class="duration-chip selected">1泊2日</div>
+      <div class="duration-chip">2泊3日</div>
+      <div class="duration-chip">それ以上</div>
+    </div>
+
+    <div class="field-label" style="margin-top:16px;">テーマ(任意・1つまで)</div>
+    <div class="duration-row">
+      <div class="duration-chip selected">🙆 なんでもOK</div>
+      <div class="duration-chip">♨️ 温泉</div>
+      <div class="duration-chip">🍜 ひとりグルメ</div>
+      <div class="duration-chip">⛩️ 寺社めぐり</div>
+      <div class="duration-chip">🏛️ 観光</div>
+      <div class="duration-chip">🏕️ 自然・キャンプ</div>
+      <div class="duration-chip">🌃 夜景</div>
+      <div class="duration-chip">🚶 街歩き</div>
+      <div class="duration-chip">🛏️ ホカンス</div>
+      <div class="duration-chip">🎤 推し活</div>
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-card-label">こう表示されます</div>
+      <div class="preview-postcard">
+        <div class="preview-pc-date">10/4(土)出発・1泊2日</div>
+        <div class="preview-pc-theme">🙆 なんでもOK</div>
+        <div class="preview-pc-copy">一緒じゃないけど、同じ時間を旅しませんか?</div>
+      </div>
+    </div>
+
+    <div class="privacy-note" style="margin-top:14px;">
+      🔒 参加者同士の事前のやり取りはできません。当日、出発と同時にタイムラインが開きます。
+    </div>
+
+    <button class="cta">リンクをシェアする</button>
+    <div class="link-row" style="text-align:center;">SNSやメッセージアプリに、招待リンクをそのまま貼れます</div>
+  </div>
+
+  <!-- TIMELINE VIEW -->
+  <div class="screen view" id="view-timeline">
+    <div class="tl-note">👀 リアクションの数は投稿した本人にしか見えません。コメントはみんなに公開されていて、返信もできます。</div>
+
+    <div class="day-divider"><span>10月4日(土) ・ 1日目</span></div>
+
+    <div class="post own-post">
+      <div class="who">
+        <div class="avatar" style="background:#3F6659;">M</div>
+        <div class="name">旅人M</div>
+        <div class="you-badge">あなた</div>
+        <div class="time">17:42</div>
+      </div>
+      <div class="postcard" style="background:linear-gradient(150deg,#5b7a8c,#2c3e4a 70%);">
+        <div class="stampmark">⛩️</div>
+        <div class="tag">京都・伏見稲荷</div>
+      </div>
+      <div class="comment">千本鳥居、思ってたより長く続いてて息切れした。夕方は人少なめでよかった。</div>
+
+      <div class="private-panel">
+        <div class="private-panel-head">🔒 あなたにだけ見えるリアクション</div>
+        <div class="private-panel-body">
+          <div class="pchip">🤝 それ分かる <b>3</b></div>
+          <div class="pchip">👏 お疲れさま <b>2</b></div>
+          <div class="pchip">😂 笑った・面白い <b>1</b></div>
+        </div>
+      </div>
+
+      <div class="comment-thread">
+        <div class="reply-toggle" onclick="this.nextElementSibling.classList.toggle('open'); this.classList.toggle('open')">💬 返信を見る(1件)</div>
+        <div class="replies">
+          <div class="reply">
+            <div class="avatar" style="background:#5B7FD9;width:22px;height:22px;font-size:10px;">S</div>
+            <div class="reply-body"><b>旅人S</b>私も伏見稲荷、朝と夕方じゃ全然雰囲気違いますよね</div>
+          </div>
+          <div class="reply-input-row">
+            <input class="reply-input" maxlength="100" placeholder="返信する(100文字まで)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="post">
+      <div class="who">
+        <div class="avatar" style="background:#A8462B;">S</div>
+        <div class="name">旅人S</div>
+        <div class="time">18:10</div>
+        <button class="more-btn" onclick="openReport(this)" aria-label="メニュー">⋯</button>
+      </div>
+      <div class="postcard" style="background:linear-gradient(150deg,#caa15a,#6b4a2a 75%);">
+        <div class="stampmark">🍜</div>
+        <div class="tag">金沢・近江町市場</div>
+      </div>
+      <div class="comment">のどぐろの塩焼き定食。ひとりだと好きなだけ写真撮れるのが地味にいい。</div>
+      <div class="reactions">
+        <div class="chip">🤤</div>
+        <div class="chip">🐟</div>
+        <div class="reaction-add-wrap">
+          <div class="chip add" onclick="togglePicker(this)">+ 応援する</div>
+          <div class="reaction-picker">
+            <div class="pk" onclick="selectReaction(this,'🤞')">🤞 <span>いいなあ</span></div>
+            <div class="pk" onclick="selectReaction(this,'🤤')">🤤 <span>美味しそう</span></div>
+            <div class="pk" onclick="selectReaction(this,'🤝')">🤝 <span>それ分かる</span></div>
+            <div class="pk" onclick="selectReaction(this,'😂')">😂 <span>笑った・面白い</span></div>
+            <div class="pk" onclick="selectReaction(this,'👏')">👏 <span>お疲れさま</span></div>
+            <div class="pk" onclick="selectReaction(this,'🌤️')">🌤️ <span>気をつけて</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="comment-thread">
+        <div class="reply-toggle" onclick="this.nextElementSibling.classList.toggle('open'); this.classList.toggle('open')">💬 返信する</div>
+        <div class="replies">
+          <div class="reply-input-row">
+            <input class="reply-input" maxlength="100" placeholder="返信する(100文字まで)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="day-divider"><span>10月5日(日) ・ 2日目</span></div>
+
+    <div class="post">
+      <div class="who">
+        <div class="avatar" style="background:#C79B3B;">K</div>
+        <div class="name">旅人K</div>
+        <div class="time">7:05</div>
+        <button class="more-btn" onclick="openReport(this)" aria-label="メニュー">⋯</button>
+      </div>
+      <div class="postcard" style="background:linear-gradient(150deg,#e7c98a,#8f6b3a 80%);">
+        <div class="stampmark">🌄</div>
+        <div class="tag">高山・朝市</div>
+      </div>
+      <div class="comment">朝5時起き、正解だった。空気が違う。今日はこのあと白川郷まで歩く予定。</div>
+      <div class="reactions">
+        <div class="chip">☀️</div>
+        <div class="reaction-add-wrap">
+          <div class="chip add" onclick="togglePicker(this)">+ 応援する</div>
+          <div class="reaction-picker">
+            <div class="pk" onclick="selectReaction(this,'🤞')">🤞 <span>いいなあ</span></div>
+            <div class="pk" onclick="selectReaction(this,'🤤')">🤤 <span>美味しそう</span></div>
+            <div class="pk" onclick="selectReaction(this,'🤝')">🤝 <span>それ分かる</span></div>
+            <div class="pk" onclick="selectReaction(this,'😂')">😂 <span>笑った・面白い</span></div>
+            <div class="pk" onclick="selectReaction(this,'👏')">👏 <span>お疲れさま</span></div>
+            <div class="pk" onclick="selectReaction(this,'🌤️')">🌤️ <span>気をつけて</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="comment-thread">
+        <div class="reply-toggle" onclick="this.nextElementSibling.classList.toggle('open'); this.classList.toggle('open')">💬 返信する</div>
+        <div class="replies">
+          <div class="reply-input-row">
+            <input class="reply-input" maxlength="100" placeholder="返信する(100文字まで)">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST VIEW -->
+  <div class="screen view" id="view-post">
+    <div class="h1">今日の旅を、ひとことだけ</div>
+
+    <div class="upload">
+      <div class="ic">📷</div>
+      <div class="t1">写真を選ぶ</div>
+      <div class="t2">風景・食事・切符など。顔が写らないように</div>
+    </div>
+
+    <div class="field-label">ひとこと(100文字まで)</div>
+    <textarea class="msg" maxlength="100" oninput="document.getElementById('cc').textContent = this.value.length" placeholder="例:バスを1本乗り過ごしたけど、そのおかげでいい景色に出会えた。">扉から見えた棚田がすごくて、思わずバスを降りてしまった。</textarea>
+    <div class="counter"><span id="cc">27</span> / 100</div>
+
+    <div class="privacy-note">
+      🔒 この投稿は「10/4に旅立った6人」だけに表示されます。旅の終了後は自動でアルバムにまとめられます。
+    </div>
+
+    <button class="cta" onclick="go('view-timeline')">この旅を共有する</button>
+  </div>
+
+  <!-- ALBUM VIEW -->
+  <div class="screen view" id="view-album">
+    <div class="album-hero">
+      <div class="stamp-icon">🧭</div>
+      <div class="h1">あなたの旅、おつかれさま</div>
+      <div class="sub">10/4〜10/6の3日間が、1冊にまとまりました</div>
+    </div>
+
+    <div class="grid3">
+      <div class="tile" style="background:linear-gradient(150deg,#5b7a8c,#2c3e4a 70%);"></div>
+      <div class="tile" style="background:linear-gradient(150deg,#caa15a,#6b4a2a 75%);"></div>
+      <div class="tile" style="background:linear-gradient(150deg,#e7c98a,#8f6b3a 80%);"></div>
+      <div class="tile" style="background:linear-gradient(160deg,#8aa0a8,#41585f 75%);"></div>
+      <div class="tile" style="background:linear-gradient(160deg,#c98a7a,#5c3830 75%);"></div>
+      <div class="tile" style="background:linear-gradient(160deg,#9bb07a,#3f4f36 75%);"></div>
+    </div>
+
+    <div class="save-row">
+      <button class="save-btn">💾 端末に保存する</button>
+      <div class="save-note">このアルバムはアプリ内の<a href="#" onclick="go('view-history'); return false;">「過去の旅」</a>にも自動で残るので、あとからいつでも見返せます。</div>
+    </div>
+
+    <div class="still-open">
+      <div class="still-open-ic">🌏</div>
+      <div>
+        <div class="still-open-t">グループはまだ続いています</div>
+        <div class="still-open-s">同じ日に出発したメンバーの中には、まだ旅の途中の人もいます。あなたの「旅人<span id="still-open-name">{{letter}}</span>」は、そのままタイムラインに残って見たりコメントしたりできます。</div>
+      </div>
+    </div>
+
+    <button class="cta" onclick="go('view-timeline')">タイムラインをのぞきに戻る</button>
+    <button class="cta secondary" onclick="go('view-join')">また新しい日程に参加する</button>
+  </div>
+
+  <!-- HISTORY VIEW -->
+  <div class="screen view" id="view-history">
+    <div class="back-link" onclick="go('view-album')">← まとめに戻る</div>
+    <div class="h1">過去の旅</div>
+    <div class="lead">これまで参加した旅が、アルバムとして残っています。タップすると見返せます。</div>
+
+    <div class="history-list">
+      <div class="history-card" onclick="go('view-album')">
+        <div class="hc-thumbs">
+          <div class="hc-tile" style="background:linear-gradient(150deg,#5b7a8c,#2c3e4a 70%);"></div>
+          <div class="hc-tile" style="background:linear-gradient(150deg,#caa15a,#6b4a2a 75%);"></div>
+          <div class="hc-tile" style="background:linear-gradient(150deg,#e7c98a,#8f6b3a 80%);"></div>
+        </div>
+        <div class="hc-body">
+          <div class="hc-date">10/4〜10/6<span class="hc-now">今回</span></div>
+          <div class="hc-theme">🍜 ひとりグルメ・3日間</div>
+        </div>
+      </div>
+
+      <div class="history-card" onclick="go('view-album')">
+        <div class="hc-thumbs">
+          <div class="hc-tile" style="background:linear-gradient(150deg,#caa48a,#6b3a3a 75%);"></div>
+          <div class="hc-tile" style="background:linear-gradient(150deg,#8ab0a0,#2f4f45 75%);"></div>
+          <div class="hc-tile" style="background:linear-gradient(150deg,#d9c27a,#7a5a2a 75%);"></div>
+        </div>
+        <div class="hc-body">
+          <div class="hc-date">8/15〜8/16</div>
+          <div class="hc-theme">♨️ 温泉・1泊2日</div>
+        </div>
+      </div>
+
+      <div class="history-card" onclick="go('view-album')">
+        <div class="hc-thumbs">
+          <div class="hc-tile" style="background:linear-gradient(150deg,#a8b9d9,#3a4a6b 75%);"></div>
+          <div class="hc-tile" style="background:linear-gradient(150deg,#c9a878,#5a3f24 75%);"></div>
+          <div class="hc-tile" style="background:linear-gradient(150deg,#9bc08a,#3d5c2f 75%);"></div>
+        </div>
+        <div class="hc-body">
+          <div class="hc-date">6/1</div>
+          <div class="hc-theme">🏛️ 観光・日帰り</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet-overlay" id="report-overlay" onclick="if(event.target===this) closeReport()">
+    <div class="sheet">
+      <div id="report-step1">
+        <div class="sheet-title">この投稿を通報する</div>
+        <div class="sheet-sub">当てはまるものを選んでください。通報した人は相手に分かりません。</div>
+        <div class="reason" onclick="submitReport()">🙈 顔が写っている</div>
+        <div class="reason" onclick="submitReport()">🗣️ 声をかけられた・連絡を求められた</div>
+        <div class="reason" onclick="submitReport()">📍 居場所が特定できそう</div>
+        <div class="reason" onclick="submitReport()">💢 不快な内容・コメント</div>
+        <div class="reason" onclick="submitReport()">その他</div>
+        <div class="urgent-note">🚨 身の危険を感じているときは、すぐに警察(110)へ連絡してください。</div>
+        <button class="cta secondary" onclick="closeReport()">キャンセル</button>
+      </div>
+      <div id="report-step2" style="display:none;">
+        <div class="sheet-title">通報を受け付けました</div>
+        <div class="sheet-sub">運営が内容を確認します。確認が終わるまで、この投稿はあなたのタイムラインに表示されません。</div>
+        <button class="cta" onclick="closeReport()">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <button class="tab-btn active" data-view="view-dates" onclick="go('view-dates')">
+      <span class="icon">🗓️</span>参加
+    </button>
+    <button class="tab-btn" data-view="view-timeline" onclick="go('view-timeline')">
+      <span class="icon">📮</span>タイムライン
+    </button>
+    <button class="tab-btn" data-view="view-post" onclick="go('view-post')">
+      <span class="icon">📷</span>投稿
+    </button>
+    <button class="tab-btn" data-view="view-create" onclick="go('view-create')">
+      <span class="icon">📣</span>募集
+    </button>
+    <button class="tab-btn" data-view="view-album" onclick="go('view-album')">
+      <span class="icon">🧭</span>まとめ
+    </button>
+  </div>
+</div>
+
+<script>
+  // すでに同じグループ内で使われている色・イニシャル(タイムラインの3人分を反映したモックデータ)
+  const takenColors = ['#3F6659', '#A8462B', '#C79B3B'];
+  const takenLetters = ['M', 'S', 'K'];
+
+  const palette = ['#3F6659','#A8462B','#C79B3B','#E0764F','#2E9E8A','#4C8FE0','#E0A93C','#7BAE4A','#C6577A','#5B7FD9'];
+  const alphabet = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+
+  let currentColor = null;
+  let currentLetter = null;
+
+  function availableColors() { return palette.filter(c => !takenColors.includes(c)); }
+  function availableLetters() { return alphabet.filter(l => !takenLetters.includes(l)); }
+
+  function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function renderPreview() {
+    const av = document.getElementById('preview-avatar');
+    av.style.background = currentColor;
+    av.textContent = currentLetter;
+    document.getElementById('preview-letter').textContent = currentLetter;
+    const stillOpen = document.getElementById('still-open-name');
+    if (stillOpen) stillOpen.textContent = currentLetter;
+  }
+
+  function renderPanel() {
+    const sw = document.getElementById('swatches');
+    sw.innerHTML = '';
+    palette.forEach(c => {
+      const taken = takenColors.includes(c);
+      const el = document.createElement('div');
+      el.className = 'swatch' + (taken ? ' taken' : (c === currentColor ? ' selected' : ''));
+      el.style.background = c;
+      if (!taken) el.onclick = () => { currentColor = c; renderPreview(); renderPanel(); };
+      sw.appendChild(el);
+    });
+
+    const lt = document.getElementById('letters');
+    lt.innerHTML = '';
+    alphabet.forEach(l => {
+      const taken = takenLetters.includes(l);
+      const el = document.createElement('div');
+      el.className = 'letter' + (taken ? ' taken' : (l === currentLetter ? ' selected' : ''));
+      el.textContent = l;
+      if (!taken) el.onclick = () => { currentLetter = l; renderPreview(); renderPanel(); };
+      lt.appendChild(el);
+    });
+  }
+
+  function reroll() {
+    currentColor = pickRandom(availableColors());
+    currentLetter = pickRandom(availableLetters());
+    renderPreview();
+    renderPanel();
+  }
+
+  // 初期表示はランダムな組み合わせ(前回と同じにしない、が基本方針)
+  reroll();
+
+  // 期間・テーマのチップ選択(行ごとに単一選択)
+  document.querySelectorAll('.duration-row').forEach(row => {
+    row.querySelectorAll('.duration-chip').forEach(chip => {
+      chip.onclick = () => {
+        row.querySelectorAll('.duration-chip').forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+      };
+    });
+  });
+
+  function togglePicker(btn) {
+    document.querySelectorAll('.reaction-picker.open').forEach(p => {
+      if (p !== btn.nextElementSibling) p.classList.remove('open');
+    });
+    btn.nextElementSibling.classList.toggle('open');
+  }
+  function selectReaction(el, emoji) {
+    const wrap = el.closest('.reaction-add-wrap');
+    const btn = wrap.querySelector('.chip.add');
+    btn.textContent = emoji + ' 応援した';
+    btn.classList.add('selected');
+    wrap.querySelector('.reaction-picker').classList.remove('open');
+  }
+
+  let reportTarget = null;
+  function openReport(btn) {
+    reportTarget = btn.closest('.post');
+    document.getElementById('report-step1').style.display = 'block';
+    document.getElementById('report-step2').style.display = 'none';
+    document.getElementById('report-overlay').classList.add('open');
+  }
+  function submitReport() {
+    if (reportTarget) reportTarget.style.display = 'none';
+    document.getElementById('report-step1').style.display = 'none';
+    document.getElementById('report-step2').style.display = 'block';
+  }
+  function closeReport() {
+    document.getElementById('report-overlay').classList.remove('open');
+  }
+
+  function go(id) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    const tabId = (id === 'view-join') ? 'view-dates' : id;
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.view === tabId);
+    });
+  }
+
+  function enterApp() {
+    document.querySelector('.phone').classList.add('entered');
+    go('view-dates');
+  }
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
