@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sobatabi-cache-v3';
+const CACHE_NAME = 'sobatabi-cache-v4';
 const URLS_TO_CACHE = [
   './',
   './index.html',
@@ -25,21 +25,19 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// ネットワーク優先: まず最新版を取りに行き、オフラインのときだけキャッシュを使う
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return (
-        cached ||
-        fetch(event.request)
-          .then((response) => {
-            if (response && response.status === 200 && event.request.method === 'GET') {
-              const responseClone = response.clone();
-              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
-            }
-            return response;
-          })
-          .catch(() => cached)
-      );
-    })
+    fetch(event.request)
+      .then((response) => {
+        if (response && response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
