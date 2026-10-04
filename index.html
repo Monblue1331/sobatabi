@@ -69,7 +69,17 @@
     font-size: 28px;
     letter-spacing: 0.06em;
     color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
   }
+  .traveler-icon {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+  }
+  .traveler-icon.flipped { transform: scaleX(-1); }
   @media (prefers-color-scheme: dark) {
     .intro .brand:not([data-theme="light"] *) { color:#EFE6D8; }
   }
@@ -1014,7 +1024,7 @@
 <body>
 
 <div class="intro">
-  <div class="brand">そばたび</div>
+  <div class="brand">🎒 そばたび 🧳</div>
   <div class="tagline">一人だけど、旅仲間がそばにいる旅。<br>同じ日程を旅する人たちだけの、期間限定タイムライン。</div>
 </div>
 
@@ -1095,6 +1105,15 @@
   <div class="screen view" id="view-dates">
     <div class="h1">旅立つ日を選ぶ</div>
     <div class="lead">気になる出発日をタップしてください。旅の長さやテーマの幅も、ここで確認できます。</div>
+
+    <div class="notice-strict">
+      <div class="notice-ic">⚠️</div>
+      <div class="notice-t">これは「一緒に行く」旅ではありません。参加後も、行き先の相談や待ち合わせの連絡はしません。</div>
+    </div>
+
+    <div class="privacy-note">
+      🔒 参加者同士の事前のやり取りはできません。当日、出発と同時にタイムラインが開きます。参加後、特にやることはありません。
+    </div>
 
     <div class="date-list">
       <div class="date-card" onclick="go('view-join')">
@@ -1224,60 +1243,86 @@
 
   <!-- CREATE CALL VIEW -->
   <div class="screen view" id="view-create">
-    <div class="h1">旅の募集を立てる</div>
-    <div class="lead">あなたの旅程を公開して、同じ時期に出発する仲間を集めます。</div>
 
-    <div class="notice-strict">
-      <div class="notice-ic">⚠️</div>
-      <div class="notice-t">これは「一緒に行く」募集ではありません。行き先や待ち合わせは書けません。集まるのは、同じ時期にそれぞれ旅立つ人だけです。</div>
-    </div>
+    <!-- Step 1: form -->
+    <div id="create-step1">
+      <div class="h1">旅の募集を立てる</div>
+      <div class="lead">あなたの旅程を公開して、同じ時期に出発する仲間を集めます。</div>
 
-    <div class="field-label">出発日</div>
-    <div class="datebox" style="margin-bottom:14px;">
-      <div>
-        <div class="d">10/4<span>(土)</span></div>
-        <div class="n">出発日</div>
+      <div class="notice-strict">
+        <div class="notice-ic">⚠️</div>
+        <div class="notice-t">これは「一緒に行く」募集ではありません。行き先や待ち合わせは書けません。集まるのは、同じ時期にそれぞれ旅立つ人だけです。</div>
       </div>
-      <div style="font-size:20px;">🗓️</div>
-    </div>
 
-    <div class="field-label">旅の長さ</div>
-    <div class="duration-row">
-      <div class="duration-chip">日帰り</div>
-      <div class="duration-chip selected">1泊2日</div>
-      <div class="duration-chip">2泊3日</div>
-      <div class="duration-chip">それ以上</div>
-    </div>
-
-    <div class="field-label" style="margin-top:16px;">テーマ(任意・1つまで)</div>
-    <div class="duration-row">
-      <div class="duration-chip selected">🙆 なんでもOK</div>
-      <div class="duration-chip">♨️ 温泉</div>
-      <div class="duration-chip">🍜 ひとりグルメ</div>
-      <div class="duration-chip">⛩️ 寺社めぐり</div>
-      <div class="duration-chip">🏛️ 観光</div>
-      <div class="duration-chip">🏕️ 自然・キャンプ</div>
-      <div class="duration-chip">🌃 夜景</div>
-      <div class="duration-chip">🚶 街歩き</div>
-      <div class="duration-chip">🛏️ ホカンス</div>
-      <div class="duration-chip">🎤 推し活</div>
-    </div>
-
-    <div class="preview-card">
-      <div class="preview-card-label">こう表示されます</div>
-      <div class="preview-postcard">
-        <div class="preview-pc-date">10/4(土)出発・1泊2日</div>
-        <div class="preview-pc-theme">🙆 なんでもOK</div>
-        <div class="preview-pc-copy">一緒じゃないけど、同じ時間を旅しませんか?</div>
+      <div class="field-label">出発日</div>
+      <div class="datebox" style="margin-bottom:14px;">
+        <div>
+          <div class="d">10/4<span>(土)</span></div>
+          <div class="n">出発日</div>
+        </div>
+        <div style="font-size:20px;">🗓️</div>
       </div>
+
+      <div class="field-label">旅の長さ</div>
+      <div class="duration-row">
+        <div class="duration-chip">日帰り</div>
+        <div class="duration-chip selected">1泊2日</div>
+        <div class="duration-chip">2泊3日</div>
+        <div class="duration-chip">それ以上</div>
+      </div>
+
+      <div class="field-label" style="margin-top:16px;">テーマ(任意・1つまで)</div>
+      <div class="duration-row">
+        <div class="duration-chip selected">🙆 なんでもOK</div>
+        <div class="duration-chip">♨️ 温泉</div>
+        <div class="duration-chip">🍜 ひとりグルメ</div>
+        <div class="duration-chip">⛩️ 寺社めぐり</div>
+        <div class="duration-chip">🏛️ 観光</div>
+        <div class="duration-chip">🏕️ 自然・キャンプ</div>
+        <div class="duration-chip">🌃 夜景</div>
+        <div class="duration-chip">🚶 街歩き</div>
+        <div class="duration-chip">🛏️ ホカンス</div>
+        <div class="duration-chip">🎤 推し活</div>
+      </div>
+
+      <div class="preview-card">
+        <div class="preview-card-label">こう表示されます</div>
+        <div class="preview-postcard">
+          <div class="preview-pc-date">10/4(土)出発・1泊2日</div>
+          <div class="preview-pc-theme">🙆 なんでもOK</div>
+          <div class="preview-pc-copy">一緒じゃないけど、同じ時間を旅しませんか?</div>
+        </div>
+      </div>
+
+      <div class="privacy-note" style="margin-top:14px;">
+        🔒 参加者同士の事前のやり取りはできません。当日、出発と同時にタイムラインが開きます。
+      </div>
+
+      <div class="privacy-note">
+        📋 「この内容で募集する」を押すと、この日程が「参加」タブの日程一覧に公開されます。まだ内容は確定していません。
+      </div>
+
+      <button class="cta" onclick="publishCreate()">この内容で募集する</button>
     </div>
 
-    <div class="privacy-note" style="margin-top:14px;">
-      🔒 参加者同士の事前のやり取りはできません。当日、出発と同時にタイムラインが開きます。
-    </div>
+    <!-- Step 2: published confirmation -->
+    <div id="create-step2" style="display:none;">
+      <div class="album-hero" style="padding-top:6px;">
+        <div class="stamp-icon">🎉</div>
+        <div class="h1">募集を公開しました</div>
+        <div class="sub">10/4(土)出発・1泊2日・🙆 なんでもOK</div>
+      </div>
 
-    <button class="cta">リンクをシェアする</button>
-    <div class="link-row" style="text-align:center;">SNSやメッセージアプリに、招待リンクをそのまま貼れます</div>
+      <div class="privacy-note">
+        📋 「参加」タブの日程一覧に表示されています。そばたびを使っている人は、リンクなしでもここから見つけて参加できます。
+      </div>
+
+      <button class="cta" style="margin-top:6px;">リンクをシェアする</button>
+      <div class="link-row" style="text-align:center;">そばたびをまだ使ったことがない友達を誘うための招待リンクです。SNSやメッセージアプリにそのまま貼れます</div>
+
+      <button class="cta secondary" onclick="editCreate()">内容を編集する</button>
+      <div class="link-row" style="text-align:center;"><a href="#" onclick="return false;">この募集を取り下げる</a></div>
+    </div>
   </div>
 
   <!-- TIMELINE VIEW -->
@@ -1635,6 +1680,15 @@
   }
   function closeReport() {
     document.getElementById('report-overlay').classList.remove('open');
+  }
+
+  function publishCreate() {
+    document.getElementById('create-step1').style.display = 'none';
+    document.getElementById('create-step2').style.display = 'block';
+  }
+  function editCreate() {
+    document.getElementById('create-step2').style.display = 'none';
+    document.getElementById('create-step1').style.display = 'block';
   }
 
   function go(id) {
